@@ -1,17 +1,18 @@
 package main
 
 import (
+	"context"
 	"log"
 	. "login/pkg/database"
-	. "login/pkg/password"
-	"net/http"
+	. "login/pkg/user/controller"
+	. "login/pkg/user/repository"
+	. "login/pkg/user/service"
 	"os"
-	"text/template"
 
 	"github.com/joho/godotenv"
 )
 
-var db = Database{}
+var db = UserRepository{}
 
 func init() {
 	err := godotenv.Load()
@@ -23,86 +24,16 @@ func init() {
 }
 
 func main() {
-	db.DBConnect()
+	ctx := context.Background()
 
-	http.HandleFunc("/login", loginHandler)
-	http.HandleFunc("/signup", signupHandler)
-	http.HandleFunc("/blocked", blockedHandler)
-	http.HandleFunc("/succes", succesHandler)
-	host := os.Getenv("HOST")
-
-	log.Printf("[Start] Server started at http://%s", host)
-	http.ListenAndServe(host, nil)
-}
-
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	var tmpl = template.Must(template.ParseFiles("web/template/login.html"))
-
-	if r.Method == "POST" {
-		uname := r.FormValue("uname")
-		pass := r.FormValue("pass")
-
-		saved := db.FindUser(uname)
-		if saved.Username == uname && CheckPasswordHash(pass, saved.Password) {
-			log.Println("[Login Succes]", uname, "login approved")
-			http.Redirect(w, r, "/succes", http.StatusSeeOther)
-			return
-		}
-
-		log.Println("[Login Failed]", uname, "login failed")
-		http.Redirect(w, r, "/blocked", http.StatusSeeOther)
-		return
-	}
-
-	var err = tmpl.Execute(w, nil)
-
+	db, err := DBConnect(ctx)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		log.Fatal("[Mongo]", err)
 	}
 
-}
+	userRepository := NewUserRepository(db)
+	userService := NewUserService(userRepository)
+	controller := NewController(userService)
 
-func signupHandler(w http.ResponseWriter, r *http.Request) {
-	var tmpl = template.Must(template.ParseFiles("web/template/signup.html"))
-
-	if r.Method == "POST" {
-		uname := r.FormValue("uname")
-		hash, _ := HashPassword(r.FormValue("pass"))
-
-		data := User{
-			Username: uname,
-			Password: hash,
-		}
-
-		db.NewUser(data)
-		log.Println("[Sign Up Succes]", uname, "created")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-	}
-
-	var err = tmpl.Execute(w, nil)
-
-	if err != nil {
-		log.Println("[Sign Up Failed] login failed")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func succesHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("web/template/succes.html"))
-	err := tmpl.Execute(w, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func blockedHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("web/template/blocked.html"))
-	err := tmpl.Execute(w, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	controller.Run()
 }
