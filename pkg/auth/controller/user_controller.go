@@ -62,7 +62,7 @@ func (u *UserController) loginHandler(w http.ResponseWriter, r *http.Request) {
 		uname := r.FormValue("username")
 		pass := r.FormValue("password")
 
-		//saved := db.FindUser(uname)
+		// TODO : Add error handling
 		saved, _ := u.userService.FindUser(uname)
 		if saved.Username == uname && CheckPasswordHash(pass, saved.Password) {
 			log.Println("[Login Succes]", uname, "login approved")

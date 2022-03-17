@@ -27,6 +27,7 @@ func (m Middleware) AuthMiddleware() mux.MiddlewareFunc {
 
 			}
 
+			// TODO procces active session that returned
 			_, err := m.session.FindSession(c.Value)
 			if err != nil {
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
