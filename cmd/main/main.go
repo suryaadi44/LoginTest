@@ -3,21 +3,22 @@ package main
 import (
 	"context"
 	"log"
+	. "login/pkg/auth/controller"
+	. "login/pkg/auth/repository"
+	. "login/pkg/auth/service"
 	. "login/pkg/database"
-	. "login/pkg/user/controller"
-	. "login/pkg/user/repository"
-	. "login/pkg/user/service"
+	. "login/pkg/middleware"
+	. "login/pkg/session/repository"
+	. "login/pkg/session/service"
 	"os"
 
 	"github.com/joho/godotenv"
 )
 
-var db = UserRepository{}
-
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("[Env File] Error loading .env file")
 	}
 
 	log.Println("[Start]", os.Getenv("APP_NAME"))
@@ -32,8 +33,12 @@ func main() {
 	}
 
 	userRepository := NewUserRepository(db)
+	sessionRepository := NewSessionRepository(db)
 	userService := NewUserService(userRepository)
-	controller := NewController(userService)
+	sessionService := NewSessionService(sessionRepository)
+	middlewareService := NewMiddlewareService(sessionService)
+
+	controller := NewController(userService, sessionService, middlewareService)
 
 	controller.Run()
 }

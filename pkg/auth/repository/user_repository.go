@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	. "login/pkg/user/entity"
+	. "login/pkg/auth/entity"
 )
 
 type UserRepository struct {
@@ -15,14 +15,15 @@ type UserRepository struct {
 	ctx context.Context
 }
 
-func (u *UserRepository) NewUser(data User) {
+func (u *UserRepository) NewUser(data User) error {
 	_, err := u.db.Collection("user_db").InsertOne(u.ctx, data)
 	if err != nil {
 		log.Println("[MONGO]", err.Error())
 	}
+	return err
 }
 
-func (u *UserRepository) FindUser(user string) User {
+func (u *UserRepository) FindUser(user string) (User, error) {
 	var result User
 
 	err := u.db.Collection("user_db").FindOne(u.ctx, bson.M{"_id": user}).Decode(&result)
@@ -30,7 +31,7 @@ func (u *UserRepository) FindUser(user string) User {
 		log.Println("[MONGO]", err.Error())
 	}
 
-	return result
+	return result, err
 }
 
 func NewUserRepository(db *mongo.Database) *UserRepository {
