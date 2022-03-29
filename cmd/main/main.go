@@ -5,15 +5,11 @@ import (
 	"log"
 	"os"
 
-	Controller "github.com/suryaadi44/LoginTest/pkg/auth/controller"
-	UserRepository "github.com/suryaadi44/LoginTest/pkg/auth/repository"
-	UserService "github.com/suryaadi44/LoginTest/pkg/auth/service"
-	Database "github.com/suryaadi44/LoginTest/pkg/database"
-	Middleware "github.com/suryaadi44/LoginTest/pkg/middleware"
-	SessionRepository "github.com/suryaadi44/LoginTest/pkg/session/repository"
-	SessionService "github.com/suryaadi44/LoginTest/pkg/session/service"
-
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/suryaadi44/LoginTest/pkg/controller"
+	Database "github.com/suryaadi44/LoginTest/pkg/database"
+	Server "github.com/suryaadi44/LoginTest/pkg/server"
 )
 
 func init() {
@@ -39,13 +35,10 @@ func main() {
 		log.Fatal("[Mongo]", err)
 	}
 
-	userRepository := UserRepository.NewUserRepository(db)
-	sessionRepository := SessionRepository.NewSessionRepository(db)
-	userService := UserService.NewUserService(userRepository)
-	sessionService := SessionService.NewSessionService(sessionRepository)
-	middlewareService := Middleware.NewMiddlewareService(sessionService)
+	router := mux.NewRouter()
 
-	controller := Controller.NewController(userService, sessionService, middlewareService)
+	controller.InitializeController(router, db)
 
-	controller.Run()
+	server := Server.NewServer(os.Getenv("PORT"), router)
+	server.Run()
 }

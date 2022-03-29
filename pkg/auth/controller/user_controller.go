@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -23,46 +22,25 @@ import (
 )
 
 type UserController struct {
+	router            *mux.Router
 	userService       *UserService
 	sessionService    *SessionService
 	middlewareService *Middleware
 }
 
-func (u *UserController) Handler() http.Handler {
-	r := mux.NewRouter()
-
-	r.PathPrefix("/static/").Handler(
+func (u *UserController) InitializeController() {
+	u.router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("web/static/"))))
 
-	r.HandleFunc("/login", u.loginHandler)
-	r.HandleFunc("/logout", u.logoutHandler)
-	r.HandleFunc("/signup", u.signupHandler)
-	r.HandleFunc("/blocked", u.blockedHandler)
+	u.router.HandleFunc("/login", u.loginHandler)
+	u.router.HandleFunc("/logout", u.logoutHandler)
+	u.router.HandleFunc("/signup", u.signupHandler)
+	u.router.HandleFunc("/blocked", u.blockedHandler)
 
-	getContent := r.PathPrefix("/succes").Subrouter()
+	getContent := u.router.PathPrefix("/succes").Subrouter()
 	getContent.Use(u.middlewareService.AuthMiddleware())
 	getContent.HandleFunc("", u.succesHandler)
-
-	return r
-}
-
-func (u *UserController) Run() {
-	port := os.Getenv("PORT")
-
-	if port == "" {
-		port = "80"
-	}
-
-	host := fmt.Sprintf(":%s", port)
-
-	httpServer := &http.Server{
-		Addr:    host,
-		Handler: u.Handler(),
-	}
-
-	log.Printf("[Start] Server started at %s", host)
-	httpServer.ListenAndServe()
 }
 
 func (u *UserController) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -190,6 +168,6 @@ func (u *UserController) blockedHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func NewController(userService *UserService, sessionService *SessionService, middlewareService *Middleware) *UserController {
-	return &UserController{userService: userService, sessionService: sessionService, middlewareService: middlewareService}
+func NewController(router *mux.Router, userService *UserService, sessionService *SessionService, middlewareService *Middleware) *UserController {
+	return &UserController{router: router, userService: userService, sessionService: sessionService, middlewareService: middlewareService}
 }
