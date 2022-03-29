@@ -1,8 +1,8 @@
 package service
 
 import (
-	. "github.com/suryaadi44/LoginTest/pkg/auth/entity"
-	. "github.com/suryaadi44/LoginTest/pkg/auth/repository"
+	. "github.com/suryaadi44/LoginTest/internal/auth/entity"
+	. "github.com/suryaadi44/LoginTest/internal/auth/repository"
 )
 
 type UserService struct {

@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/suryaadi44/LoginTest/pkg/auth/entity"
-	. "github.com/suryaadi44/LoginTest/pkg/auth/service"
+	. "github.com/suryaadi44/LoginTest/internal/auth/entity"
+	. "github.com/suryaadi44/LoginTest/internal/auth/service"
+	. "github.com/suryaadi44/LoginTest/internal/middleware"
+	. "github.com/suryaadi44/LoginTest/internal/session/entity"
+	. "github.com/suryaadi44/LoginTest/internal/session/service"
 	. "github.com/suryaadi44/LoginTest/pkg/dto"
-	. "github.com/suryaadi44/LoginTest/pkg/middleware"
 	. "github.com/suryaadi44/LoginTest/pkg/password"
-	. "github.com/suryaadi44/LoginTest/pkg/session/entity"
-	. "github.com/suryaadi44/LoginTest/pkg/session/service"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"

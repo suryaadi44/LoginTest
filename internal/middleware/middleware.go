@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	. "github.com/suryaadi44/LoginTest/pkg/session/service"
+	. "github.com/suryaadi44/LoginTest/internal/session/service"
 
 	"github.com/gorilla/mux"
 )

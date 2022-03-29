@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	. "github.com/suryaadi44/LoginTest/pkg/session/entity"
+	. "github.com/suryaadi44/LoginTest/internal/session/entity"
 )
 
 type SessionRepository struct {
