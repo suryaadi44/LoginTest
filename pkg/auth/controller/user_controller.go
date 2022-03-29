@@ -27,9 +27,9 @@ type UserController struct {
 func (u *UserController) Handler() http.Handler {
 	r := mux.NewRouter()
 
-	r.Handle("/static/",
+	r.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/",
-			http.FileServer(http.Dir("web/static"))))
+			http.FileServer(http.Dir("web/static/"))))
 
 	r.HandleFunc("/login", u.loginHandler)
 	r.HandleFunc("/logout", u.logoutHandler)
@@ -56,7 +56,7 @@ func (u *UserController) Run() {
 }
 
 func (u *UserController) loginHandler(w http.ResponseWriter, r *http.Request) {
-	var tmpl = template.Must(template.ParseFiles("web/template/login.html"))
+	var tmpl = template.Must(template.ParseFiles("web/template/login/index.html"))
 
 	if r.Method == "POST" {
 		uname := r.FormValue("username")
@@ -100,7 +100,7 @@ func (u *UserController) loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserController) signupHandler(w http.ResponseWriter, r *http.Request) {
-	var tmpl = template.Must(template.ParseFiles("web/template/signup.html"))
+	var tmpl = template.Must(template.ParseFiles("web/template/signup/index.html"))
 
 	if r.Method == "POST" {
 		uname := r.FormValue("username")

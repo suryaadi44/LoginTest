@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"log"
-	. "login/pkg/auth/controller"
-	. "login/pkg/auth/repository"
-	. "login/pkg/auth/service"
-	. "login/pkg/database"
-	. "login/pkg/middleware"
-	. "login/pkg/session/repository"
-	. "login/pkg/session/service"
+	Controller "login/pkg/auth/controller"
+	UserRepository "login/pkg/auth/repository"
+	UserService "login/pkg/auth/service"
+	Database "login/pkg/database"
+	Middleware "login/pkg/middleware"
+	SessionRepository "login/pkg/session/repository"
+	SessionService "login/pkg/session/service"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -27,18 +27,18 @@ func init() {
 func main() {
 	ctx := context.Background()
 
-	db, err := DBConnect(ctx)
+	db, err := Database.DBConnect(ctx)
 	if err != nil {
 		log.Fatal("[Mongo]", err)
 	}
 
-	userRepository := NewUserRepository(db)
-	sessionRepository := NewSessionRepository(db)
-	userService := NewUserService(userRepository)
-	sessionService := NewSessionService(sessionRepository)
-	middlewareService := NewMiddlewareService(sessionService)
+	userRepository := UserRepository.NewUserRepository(db)
+	sessionRepository := SessionRepository.NewSessionRepository(db)
+	userService := UserService.NewUserService(userRepository)
+	sessionService := SessionService.NewSessionService(sessionRepository)
+	middlewareService := Middleware.NewMiddlewareService(sessionService)
 
-	controller := NewController(userService, sessionService, middlewareService)
+	controller := Controller.NewController(userService, sessionService, middlewareService)
 
 	controller.Run()
 }
