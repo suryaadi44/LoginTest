@@ -61,7 +61,7 @@ func (u *UserController) Run() {
 		Handler: u.Handler(),
 	}
 
-	log.Printf("[Start] Server started at http://%s", host)
+	log.Printf("[Start] Server started at %s", host)
 	httpServer.ListenAndServe()
 }
 

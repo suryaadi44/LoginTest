@@ -19,10 +19,16 @@ import (
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("[Env File] Error loading .env file")
+		log.Println("[Env File] Error loading .env file")
 	}
 
-	log.Println("[Start]", os.Getenv("APP_NAME"))
+	appName, present := os.LookupEnv("APP_NAME")
+
+	if !present {
+		log.Fatal("[Env Var] Env variable not configure correctly")
+	}
+
+	log.Println("[Start]", appName)
 }
 
 func main() {
