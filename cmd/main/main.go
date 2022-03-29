@@ -3,14 +3,15 @@ package main
 import (
 	"context"
 	"log"
-	Controller "login/pkg/auth/controller"
-	UserRepository "login/pkg/auth/repository"
-	UserService "login/pkg/auth/service"
-	Database "login/pkg/database"
-	Middleware "login/pkg/middleware"
-	SessionRepository "login/pkg/session/repository"
-	SessionService "login/pkg/session/service"
 	"os"
+
+	Controller "github.com/suryaadi44/LoginTest/pkg/auth/controller"
+	UserRepository "github.com/suryaadi44/LoginTest/pkg/auth/repository"
+	UserService "github.com/suryaadi44/LoginTest/pkg/auth/service"
+	Database "github.com/suryaadi44/LoginTest/pkg/database"
+	Middleware "github.com/suryaadi44/LoginTest/pkg/middleware"
+	SessionRepository "github.com/suryaadi44/LoginTest/pkg/session/repository"
+	SessionService "github.com/suryaadi44/LoginTest/pkg/session/service"
 
 	"github.com/joho/godotenv"
 )

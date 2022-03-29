@@ -1,8 +1,8 @@
 package service
 
 import (
-	. "login/pkg/session/entity"
-	. "login/pkg/session/repository"
+	. "github.com/suryaadi44/LoginTest/pkg/session/entity"
+	. "github.com/suryaadi44/LoginTest/pkg/session/repository"
 )
 
 type SessionService struct {

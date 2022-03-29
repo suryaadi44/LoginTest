@@ -1,4 +1,4 @@
-module login
+module github.com/suryaadi44/LoginTest
 
 go 1.17
 
