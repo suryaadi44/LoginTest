@@ -1,1 +1,1 @@
-web: bin/LoginTest
+web: bin/LoginTest.exe
