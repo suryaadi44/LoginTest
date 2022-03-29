@@ -33,7 +33,6 @@
                         <input
                             class="form-control"
                             type="email"
-                            name="username"
                             id="username"
                             placeholder="Email"
                             required
@@ -44,7 +43,6 @@
                             class="form-control"
                             type="password"
                             id="password"
-                            name="password"
                             placeholder="Password"
                             required
                         />
@@ -62,13 +60,14 @@
                     <div class="mb-3">
                         <button
                             class="btn btn-primary d-block w-100"
-                            id="create"
+                            id="submit-btn"
                             type="submit"
                             style="background: #3f2178"
                         >
                             Sign Up
                         </button>
                     </div>
+                    <span id="form-messages"></span>
                     <a class="already" href="/login"
                         >You already have an account? Login here.</a
                     >
@@ -88,17 +87,53 @@
                         "red";
                     document.getElementById("repeat-pass-alert").innerHTML =
                         "Use same password";
-                    document.getElementById("create").disabled = true;
-                    document.getElementById("create").style.opacity = 0.4;
+                    document.getElementById("submit-btn").disabled = true;
+                    document.getElementById("submit-btn").style.opacity = 0.4;
                 } else {
                     document.getElementById("repeat-pass-alert").style.color =
                         "green";
                     document.getElementById("repeat-pass-alert").innerHTML =
                         "Password Matched";
-                    document.getElementById("create").disabled = false;
-                    document.getElementById("create").style.opacity = 1;
+                    document.getElementById("submit-btn").disabled = false;
+                    document.getElementById("submit-btn").style.opacity = 1;
                 }
             }
+
+            const form = {
+                email: document.querySelector("#username"),
+                password: document.querySelector("#password"),
+                submit: document.querySelector("#submit-btn"),
+                messages: document.getElementById("form-messages"),
+            };
+            let button = form.submit.addEventListener("click", (e) => {
+                e.preventDefault();
+                const signup = "/signup";
+
+                fetch(signup, {
+                    method: "POST",
+                    redirect: "follow",
+                    headers: {
+                        Accept: "application/json, text/plain, */*",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        username: form.email.value,
+                        password: form.password.value,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((result) => {
+                        if (result.error) {
+                            document.getElementById(
+                                "form-messages"
+                            ).style.color = "red";
+                            document.getElementById("form-messages").innerHTML =
+                                result.data;
+                        } else {
+                            window.location.href = result.data;
+                        }
+                    });
+            });
         </script>
     </body>
 </html>

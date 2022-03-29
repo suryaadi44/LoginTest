@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	. "login/pkg/auth/entity"
 	. "login/pkg/auth/service"
+	. "login/pkg/dto"
 	. "login/pkg/middleware"
 	. "login/pkg/password"
 	. "login/pkg/session/entity"
@@ -59,17 +62,23 @@ func (u *UserController) loginHandler(w http.ResponseWriter, r *http.Request) {
 	var tmpl = template.Must(template.ParseFiles("web/template/login/index.html"))
 
 	if r.Method == "POST" {
-		uname := r.FormValue("username")
-		pass := r.FormValue("password")
+		decoder := json.NewDecoder(r.Body)
+		payload := Form{}
+
+		if err := decoder.Decode(&payload); err != nil {
+			log.Println("[DECODE] Error decoding JSON")
+			NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
+			return
+		}
 
 		// TODO : Add error handling
-		saved, _ := u.userService.FindUser(uname)
-		if saved.Username == uname && CheckPasswordHash(pass, saved.Password) {
-			log.Println("[Login Succes]", uname, "login approved")
+		saved, _ := u.userService.FindUser(payload.Username)
+		if saved.Username == payload.Username && CheckPasswordHash(payload.Password, saved.Password) {
+			log.Println("[Login Succes]", payload.Username, "login approved")
 
 			session := Session{
 				SessionToken: uuid.NewString(),
-				Username:     uname,
+				Username:     payload.Username,
 				Expire:       time.Now().Add(time.Duration(SESSION_EXPIRE_IN_SECOND) * time.Second),
 			}
 
@@ -81,57 +90,63 @@ func (u *UserController) loginHandler(w http.ResponseWriter, r *http.Request) {
 				Expires: session.Expire,
 			})
 
-			http.Redirect(w, r, "/succes", http.StatusSeeOther)
+			NewBaseResponse(http.StatusSeeOther, false, "/succes").SendResponse(&w)
 			return
 		}
 
-		log.Println("[Login Failed]", uname, "login failed")
-		http.Redirect(w, r, "/blocked", http.StatusSeeOther)
+		log.Println("[Login Failed]", payload.Username, "login failed")
+		NewBaseResponse(http.StatusUnauthorized, true, "Inccorect Username or Password").SendResponse(&w)
 		return
 	}
 
 	var err = tmpl.Execute(w, nil)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
 		return
 	}
-
 }
 
 func (u *UserController) signupHandler(w http.ResponseWriter, r *http.Request) {
 	var tmpl = template.Must(template.ParseFiles("web/template/signup/index.html"))
 
 	if r.Method == "POST" {
-		uname := r.FormValue("username")
-		hash, _ := HashPassword(r.FormValue("password"))
+		decoder := json.NewDecoder(r.Body)
+		payload := Form{}
 
+		if err := decoder.Decode(&payload); err != nil {
+			log.Println("[DECODE] Error decoding JSON")
+			NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
+			return
+		}
+
+		hash, _ := HashPassword(payload.Password)
 		data := User{
-			Username: uname,
+			Username: payload.Username,
 			Password: hash,
 		}
 
 		err := u.userService.NewUser(data)
 		if err == nil {
-			log.Println("[Sign Up Succes]", uname, "created")
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			log.Println("[Sign Up Succes]", payload.Username, "created")
+			NewBaseResponse(http.StatusSeeOther, false, "/login").SendResponse(&w)
 			return
 		}
 
 		if !strings.Contains(err.Error(), "duplicate") {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
 			return
 		}
 
-		log.Println("[Sign Up Failed]", uname, "Already exist")
-		http.Redirect(w, r, "/signup", http.StatusSeeOther)
+		log.Println("[Sign Up Failed]", payload.Username, "Already exist")
+		NewBaseResponse(http.StatusOK, true, fmt.Sprintf("Accout with username %s already exist", payload.Username)).SendResponse(&w)
 		return
 	}
 
 	var err = tmpl.Execute(w, nil)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
 		return
 	}
 }
@@ -154,7 +169,7 @@ func (u *UserController) succesHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("web/template/succes.html"))
 	err := tmpl.Execute(w, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
 		return
 	}
 }
@@ -163,7 +178,7 @@ func (u *UserController) blockedHandler(w http.ResponseWriter, r *http.Request) 
 	tmpl := template.Must(template.ParseFiles("web/template/blocked.html"))
 	err := tmpl.Execute(w, nil)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		NewBaseResponse(http.StatusInternalServerError, true, err.Error()).SendResponse(&w)
 		return
 	}
 }
