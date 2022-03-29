@@ -50,7 +50,7 @@ func (u *UserController) Handler() http.Handler {
 func (u *UserController) Run() {
 	port := os.Getenv("PORT")
 
-	host := fmt.Sprintf(":%d", port)
+	host := fmt.Sprintf(":%s", port)
 
 	httpServer := &http.Server{
 		Addr:    host,
