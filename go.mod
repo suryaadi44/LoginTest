@@ -2,8 +2,6 @@ module github.com/suryaadi44/LoginTest
 
 go 1.17
 
-// +heroku install ./cmd/...
-
 require (
 	github.com/joho/godotenv v1.4.0
 	go.mongodb.org/mongo-driver v1.8.4
